@@ -5,7 +5,7 @@ import { Hotel, CreateHotelDto } from '../models/hotel.model';
 
 @Injectable({ providedIn: 'root' })
 export class HotelService {
-  private apiUrl = 'http://localhost:5000/api/hotel';
+  private apiUrl = 'http://localhost:5079/api/hotel';
 
   constructor(private http: HttpClient) {}
 

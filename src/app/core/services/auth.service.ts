@@ -6,7 +6,7 @@ import { AuthResponse, LoginDto, RegisterDto, UserDto } from '../models/user.mod
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/api/auth';
+  private apiUrl = 'http://localhost:5079/api/auth';
   private tokenKey = 'hotel_token';
   private userKey = 'hotel_user';
 
