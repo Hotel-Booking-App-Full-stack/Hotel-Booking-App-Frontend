@@ -1,1 +1,74 @@
-<p>register works!</p>
+<div class="auth-wrapper">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="auth-card">
+          <div class="auth-header">
+            <i class="bi bi-person-plus fs-1 mb-2 d-block"></i>
+            <h2>Create Account</h2>
+            <p>Join us to start booking</p>
+          </div>
+
+          <div class="auth-body">
+            <div class="alert alert-danger" *ngIf="error">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="submit()">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Full Name</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person"></i></span>
+                  <input formControlName="fullName" type="text" class="form-control form-control-custom"
+                         placeholder="John Doe">
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.get('fullName')?.invalid && form.get('fullName')?.touched">
+                  Minimum 3 characters required.
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input formControlName="email" type="email" class="form-control form-control-custom"
+                         placeholder="you@example.com">
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+                  Valid email required.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                  <input formControlName="password" type="password" class="form-control form-control-custom"
+                         placeholder="Min 6 characters">
+                </div>
+                <div class="text-danger small mt-1"
+                     *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+                  Minimum 6 characters required.
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary-custom w-100 py-3" [disabled]="loading">
+                <span class="spinner-border spinner-border-sm me-2" *ngIf="loading"></span>
+                <i class="bi bi-person-check me-2" *ngIf="!loading"></i>
+                {{ loading ? 'Creating...' : 'Create Account' }}
+              </button>
+            </form>
+
+            <hr class="my-4">
+            <p class="text-center mb-0">
+              Already have an account?
+              <a routerLink="/login" class="text-primary fw-semibold">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
