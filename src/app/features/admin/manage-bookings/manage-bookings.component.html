@@ -1,1 +1,69 @@
-<p>manage-bookings works!</p>
+<div class="page-header">
+  <div class="container">
+    <h1><i class="bi bi-list-check me-3"></i>Manage Bookings</h1>
+    <p>View and manage all reservations</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <select class="form-select w-auto" [(ngModel)]="filterStatus">
+      <option value="">All Status</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+    <span class="text-muted ms-2">Showing {{ filtered.length }} bookings</span>
+  </div>
+
+  <div class="text-center py-5" *ngIf="loading">
+    <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
+  </div>
+
+  <div class="table-responsive" *ngIf="!loading">
+    <table class="table table-modern">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Guest</th>
+          <th>Hotel / Room</th>
+          <th>Dates</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of filtered">
+          <td class="fw-semibold text-muted">#{{ b.id }}</td>
+          <td>
+            <div class="fw-semibold">{{ b.userName }}</div>
+            <div class="text-muted small">{{ b.userEmail }}</div>
+          </td>
+          <td>
+            <div class="fw-semibold">{{ b.hotelName }}</div>
+            <div class="text-muted small">{{ b.roomType }} — Room {{ b.roomNumber }}</div>
+          </td>
+          <td>
+            <div>{{ b.checkInDate | date:'MMM dd' }} → {{ b.checkOutDate | date:'MMM dd, yyyy' }}</div>
+          </td>
+          <td class="fw-semibold text-primary">${{ b.totalAmount | number:'1.2-2' }}</td>
+          <td>
+            <span [class]="b.status === 'Confirmed' ? 'badge-confirmed' : 'badge-cancelled'">
+              {{ b.status }}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger"
+                    *ngIf="b.status === 'Confirmed'"
+                    (click)="cancel(b.id)"
+                    [disabled]="cancelling === b.id">
+              <span class="spinner-border spinner-border-sm" *ngIf="cancelling === b.id"></span>
+              <i class="bi bi-x-circle" *ngIf="cancelling !== b.id"></i>
+              Cancel
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
