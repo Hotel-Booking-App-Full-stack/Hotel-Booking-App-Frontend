@@ -5,7 +5,7 @@ import { Room, CreateRoomDto } from '../models/room.model';
 
 @Injectable({ providedIn: 'root' })
 export class RoomService {
-  private apiUrl = 'http://localhost:5000/api/room';
+  private apiUrl = 'http://localhost:5079/api/room';
 
   constructor(private http: HttpClient) {}
 
