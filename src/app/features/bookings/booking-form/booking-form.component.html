@@ -1,1 +1,90 @@
-<p>booking-form works!</p>
+<div class="page-header">
+  <div class="container">
+    <h1><i class="bi bi-calendar-plus me-3"></i>Book a Room</h1>
+    <p>Complete your reservation details below</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <!-- Success -->
+  <div class="alert alert-success rounded-3 py-4 text-center" *ngIf="success">
+    <i class="bi bi-check-circle-fill fs-1 d-block mb-2"></i>
+    <h4>Booking Confirmed!</h4>
+    <p class="mb-0">Redirecting to your bookings...</p>
+  </div>
+
+  <div class="row g-4" *ngIf="!success">
+    <!-- Form -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-3 p-4">
+        <h4 class="fw-bold mb-4">Reservation Details</h4>
+
+        <div class="alert alert-danger" *ngIf="error">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Check-in Date</label>
+              <input type="date" formControlName="checkInDate" class="form-control form-control-custom">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Check-out Date</label>
+              <input type="date" formControlName="checkOutDate" class="form-control form-control-custom">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Special Requests (optional)</label>
+            <textarea formControlName="specialRequests" class="form-control form-control-custom" rows="3"
+                      placeholder="Any special requirements..."></textarea>
+          </div>
+
+          <div class="alert alert-warning" *ngIf="nights <= 0">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Check-out must be after check-in.
+          </div>
+
+          <button type="submit" class="btn btn-primary-custom w-100 py-3"
+                  [disabled]="loading || nights <= 0">
+            <span class="spinner-border spinner-border-sm me-2" *ngIf="loading"></span>
+            <i class="bi bi-check-circle me-2" *ngIf="!loading"></i>
+            {{ loading ? 'Processing...' : 'Confirm Booking' }}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow rounded-3 p-4" *ngIf="hotel && room">
+        <h5 class="fw-bold mb-4">Booking Summary</h5>
+
+        <img [src]="hotel.imageUrl" class="w-100 rounded-3 mb-3" style="height:160px;object-fit:cover">
+
+        <h6 class="fw-bold">{{ hotel.name }}</h6>
+        <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i>{{ hotel.location }}</p>
+
+        <div class="border-top pt-3">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Room</span>
+            <span class="fw-semibold">{{ room.roomType }} #{{ room.roomNumber }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Price per night</span>
+            <span>${{ room.pricePerNight }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Nights</span>
+            <span>{{ nights }}</span>
+          </div>
+          <div class="d-flex justify-content-between border-top pt-3 mt-2">
+            <span class="fw-bold fs-5">Total</span>
+            <span class="fw-bold fs-5 text-primary">${{ totalAmount | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

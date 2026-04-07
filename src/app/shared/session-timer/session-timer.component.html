@@ -1,1 +1,15 @@
-<p>session-timer works!</p>
+<ng-container *ngIf="isLoggedIn">
+  <!-- Progress bar at top -->
+  <div class="session-bar">
+    <div class="session-progress" [style.width.%]="progressWidth"
+         [style.background]="progressWidth < 20 ? '#e17055' : 'linear-gradient(90deg, #00b894, #6c5ce7)'">
+    </div>
+  </div>
+
+  <!-- Warning toast when < 1 minute -->
+  <div class="session-warning" *ngIf="showWarning">
+    <div class="warning-title"><i class="bi bi-clock-history me-2"></i>Session Expiring</div>
+    <div class="warning-time">{{ padZero(minutes) }}:{{ padZero(seconds) }}</div>
+    <div class="text-muted small mt-1">Your session will expire soon</div>
+  </div>
+</ng-container>
