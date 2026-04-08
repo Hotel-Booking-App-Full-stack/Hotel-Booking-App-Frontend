@@ -70,7 +70,7 @@
           </p>
 
           <p class="card-text text-muted small flex-grow-1">
-            {{ hotel.description | slice:0:100 }}{{ hotel.description?.length > 100 ? '...' : '' }}
+            {{ hotel.description | slice:0:100 }}{{ (hotel.description?.length ?? 0) > 100 ? '...' : '' }}
           </p>
 
           <div class="d-flex flex-wrap gap-1 mb-3">
