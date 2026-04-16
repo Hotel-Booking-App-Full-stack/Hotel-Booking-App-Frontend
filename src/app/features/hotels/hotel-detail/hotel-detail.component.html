@@ -1,88 +1,160 @@
-<div *ngIf="loading" class="text-center py-5">
-  <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
-</div>
-
-<ng-container *ngIf="!loading && hotel">
-  <!-- Hotel Hero -->
-  <div class="position-relative" style="height: 400px; overflow: hidden;">
-    <img [src]="hotel.imageUrl" [alt]="hotel.name" class="w-100 h-100" style="object-fit: cover;">
-    <div class="position-absolute top-0 start-0 end-0 bottom-0"
-         style="background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7))">
-    </div>
-    <div class="position-absolute bottom-0 start-0 p-4 text-white">
-      <div class="stars mb-1">
-        <ng-container *ngFor="let _ of getStarArray(hotel.starRating)">★</ng-container>
+<ng-container *ngIf="hotel">
+  <!-- Hero -->
+  <div class="hp-hotel-hero">
+    <img [src]="hotel.imageUrl" [alt]="hotel.name"
+         onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200'">
+    <div class="hp-hotel-hero__overlay"></div>
+    <div class="container hp-hotel-hero__content">
+      <div class="hp-hotel-hero__stars">
+        <span *ngFor="let _ of stars(hotel.starRating)">★</span>
       </div>
-      <h1 class="fw-bold">{{ hotel.name }}</h1>
-      <p class="mb-0"><i class="bi bi-geo-alt me-1"></i>{{ hotel.location }}</p>
+      <h1>{{ hotel.name }}</h1>
+      <p><i class="bi bi-geo-alt-fill me-1"></i>{{ hotel.location }}</p>
     </div>
   </div>
 
-  <div class="container py-5">
+  <div class="container hp-section">
     <div class="row g-4">
-      <!-- Left: Details -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-3 mb-4 p-4">
-          <h4 class="fw-bold mb-3">About this Hotel</h4>
-          <p class="text-muted">{{ hotel.description }}</p>
-        </div>
 
-        <!-- Amenities -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4 p-4">
-          <h4 class="fw-bold mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i>Amenities</h4>
-          <div class="d-flex flex-wrap gap-2">
-            <ng-container *ngFor="let a of (hotel.amenities?.split(',') || [])">
-              <span class="badge rounded-pill px-3 py-2"
-                    style="background:#f0edff;color:#6c5ce7;font-size:0.85rem">
-                <i class="bi bi-check me-1"></i>{{ a.trim() }}
+      <!-- LEFT COLUMN -->
+      <div class="col-lg-8">
+
+        <!-- Room type inventory cards -->
+        <div class="hp-inventory-grid mb-4" *ngIf="summaries.length">
+          <div class="hp-inv-card" *ngFor="let s of summaries"
+               [class.hp-inv-card--active]="filterType === s.roomType"
+               (click)="filterType = s.roomType; applyFilters()">
+            <div class="hp-inv-card__type">{{ s.roomType }}</div>
+            <div class="hp-inv-card__count">
+              <span class="hp-inv-card__num" [class.zero]="s.availableCount === 0">
+                {{ s.availableCount }}
               </span>
-            </ng-container>
+              <span class="hp-inv-card__total">/ {{ s.totalRooms }}</span>
+            </div>
+            <div class="hp-inv-card__label">available rooms</div>
+            <div class="hp-inv-bar">
+              <div class="hp-inv-bar__fill"
+                   [style.width.%]="(s.availableCount / s.totalRooms) * 100"
+                   [class.low]="s.availableCount / s.totalRooms <= 0.3"
+                   [class.none]="s.availableCount === 0"></div>
+            </div>
+            <div class="hp-inv-card__price">From ₹{{ s.minPrice }}/night</div>
           </div>
         </div>
 
-        <!-- Rooms -->
-        <h4 class="fw-bold mb-3">Available Rooms</h4>
-        <div *ngIf="rooms.length === 0" class="text-center py-4 text-muted">
-          <i class="bi bi-door-closed fs-1"></i>
-          <p class="mt-2">No rooms available at this time.</p>
+        <!-- Filter panel -->
+        <div class="hp-filter-panel mb-4">
+          <div class="hp-filter-panel__title">
+            <i class="bi bi-funnel-fill me-2"></i>Search Rooms
+          </div>
+          <div class="hp-filter-panel__row">
+            <div class="hp-field-sm">
+              <label class="hp-label-sm">Room Type</label>
+              <select [(ngModel)]="filterType" class="hp-select">
+                <option value="">All Types</option>
+                <option *ngFor="let t of roomTypes" [value]="t">{{ t }}</option>
+              </select>
+            </div>
+            <div class="hp-field-sm">
+              <label class="hp-label-sm">Min Price</label>
+              <input type="number" [(ngModel)]="filterMin" class="hp-input hp-input--sm" placeholder="₹0">
+            </div>
+            <div class="hp-field-sm">
+              <label class="hp-label-sm">Max Price</label>
+              <input type="number" [(ngModel)]="filterMax" class="hp-input hp-input--sm" placeholder="Any">
+            </div>
+            <div class="hp-field-sm hp-check-field">
+              <label class="hp-checkbox-label">
+                <input type="checkbox" [(ngModel)]="filterAvail">
+                <span>Available only</span>
+              </label>
+            </div>
+            <div class="hp-filter-actions">
+              <button class="hp-btn hp-btn--primary hp-btn--sm" (click)="applyFilters()">
+                <i class="bi bi-search me-1"></i>Apply
+              </button>
+              <button class="hp-btn hp-btn--ghost hp-btn--sm" (click)="clearFilters()">Clear</button>
+            </div>
+          </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-3 mb-3 p-4" *ngFor="let room of rooms">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <div class="d-flex align-items-center gap-3 mb-2">
-                <h5 class="fw-bold mb-0">{{ room.roomType }} — Room {{ room.roomNumber }}</h5>
-                <span [class]="room.isAvailable ? 'badge-available' : 'badge-unavailable'">
-                  {{ room.isAvailable ? 'Available' : 'Booked' }}
-                </span>
-              </div>
-              <p class="text-muted mb-2">{{ room.description }}</p>
-              <span class="badge bg-light text-dark border me-2">
-                <i class="bi bi-people me-1"></i>Max {{ room.maxOccupancy }} guests
+        <!-- Loading -->
+        <div class="hp-state-center py-4" *ngIf="loading">
+          <div class="hp-spinner hp-spinner--lg"></div>
+        </div>
+
+        <!-- Empty rooms -->
+        <div class="hp-empty-state hp-empty-state--sm" *ngIf="!loading && rooms.length === 0">
+          <i class="bi bi-door-closed hp-empty-icon"></i>
+          <p>No rooms match your filters</p>
+          <button class="hp-btn hp-btn--ghost hp-btn--sm" (click)="clearFilters()">Clear filters</button>
+        </div>
+
+        <!-- Room cards -->
+        <div class="hp-room-card" *ngFor="let r of rooms">
+          <div class="hp-room-card__left">
+            <div class="hp-room-card__header">
+              <span class="hp-room-type-badge">{{ r.roomType }}</span>
+              <span class="hp-room-number">Room #{{ r.roomNumber }}</span>
+              <span class="hp-avail-pill hp-avail-pill--{{ availClass(r) }}">
+                <ng-container *ngIf="r.availableCount > 0">
+                  {{ r.availableCount }}/{{ r.totalRooms }} available
+                </ng-container>
+                <ng-container *ngIf="r.availableCount === 0">Fully Booked</ng-container>
               </span>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-              <div class="fs-4 fw-bold text-primary">${{ room.pricePerNight }}<span class="text-muted small">/night</span></div>
-              <button class="btn btn-primary-custom mt-2" (click)="book(room)" [disabled]="!room.isAvailable">
-                <i class="bi bi-calendar-plus me-1"></i>Book Now
-              </button>
+            <p class="hp-room-card__desc">{{ r.description }}</p>
+            <div class="hp-room-card__tags">
+              <span class="hp-tag"><i class="bi bi-people me-1"></i>Max {{ r.maxOccupancy }}</span>
+              <span class="hp-tag" *ngIf="r.bookedCount > 0">
+                <i class="bi bi-bookmark-check me-1"></i>{{ r.bookedCount }} booked
+              </span>
             </div>
+            <!-- Inventory bar -->
+            <div class="hp-inv-bar hp-inv-bar--inline mt-2" *ngIf="r.totalRooms > 1">
+              <div class="hp-inv-bar__fill"
+                   [style.width.%]="(r.availableCount / r.totalRooms) * 100"
+                   [class.low]="r.availableCount / r.totalRooms <= 0.3"
+                   [class.none]="r.availableCount === 0"></div>
+            </div>
+          </div>
+          <div class="hp-room-card__right">
+            <div class="hp-room-price">₹{{ r.pricePerNight }}<span>/night</span></div>
+            <button class="hp-btn hp-btn--primary hp-btn--full mt-2"
+                    (click)="book(r)" [disabled]="r.availableCount === 0">
+              <i class="bi bi-calendar-plus me-1" *ngIf="r.availableCount > 0"></i>
+              <i class="bi bi-x-circle me-1" *ngIf="r.availableCount === 0"></i>
+              {{ r.availableCount > 0 ? 'Book Now' : 'Fully Booked' }}
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- Right: Summary card -->
+      <!-- RIGHT COLUMN -->
       <div class="col-lg-4">
-        <div class="card border-0 shadow rounded-3 p-4 sticky-top" style="top: 80px">
-          <h5 class="fw-bold mb-3">Hotel Summary</h5>
-          <div class="mb-2"><i class="bi bi-star-fill text-warning me-2"></i>{{ hotel.starRating }}-Star Hotel</div>
-          <div class="mb-2"><i class="bi bi-door-open me-2 text-primary"></i>{{ hotel.roomCount }} available rooms</div>
-          <div class="mb-3"><i class="bi bi-currency-dollar me-2 text-success"></i>From ${{ hotel.minPrice }}/night</div>
-          <a routerLink="/hotels" class="btn btn-outline-secondary w-100">
-            <i class="bi bi-arrow-left me-2"></i>Back to Hotels
+        <div class="hp-card p-4 hp-sticky-sidebar">
+          <h5 class="hp-card-title mb-3">Hotel Overview</h5>
+          <div class="hp-detail-item"><i class="bi bi-star-fill"></i>{{ hotel.starRating }}-Star Hotel</div>
+          <div class="hp-detail-item"><i class="bi bi-door-open"></i>{{ hotel.roomCount }} room types</div>
+          <div class="hp-detail-item"><i class="bi bi-cash-coin"></i>From ₹{{ hotel.minPrice }}/night</div>
+          <hr class="hp-divider my-3">
+          <h6 class="fw-semibold mb-2">Amenities</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="hp-tag" *ngFor="let a of hotel.amenities?.split(',') || []">
+              <i class="bi bi-check2 me-1"></i>{{ a.trim() }}
+            </span>
+          </div>
+          <hr class="hp-divider my-3">
+          <p class="hp-text-muted small">{{ hotel.description }}</p>
+          <a routerLink="/hotels" class="hp-btn hp-btn--ghost hp-btn--full mt-3">
+            <i class="bi bi-arrow-left me-1"></i>Back to Hotels
           </a>
         </div>
       </div>
+
     </div>
   </div>
 </ng-container>
+<div class="hp-state-center py-5" *ngIf="!hotel">
+  <div class="hp-spinner hp-spinner--lg"></div>
+</div>

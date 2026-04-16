@@ -1,76 +1,57 @@
-<div class="page-header">
+<div class="hp-page-header">
   <div class="container">
-    <h1><i class="bi bi-calendar-check me-3"></i>My Bookings</h1>
-    <p>Manage all your hotel reservations</p>
+    <h1><i class="bi bi-calendar-check me-2"></i>My Bookings</h1>
+    <p>View and manage your hotel reservations</p>
   </div>
 </div>
 
-<div class="container pb-5">
-  <div class="text-center py-5" *ngIf="loading">
-    <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
+<div class="container hp-section">
+  <div class="hp-state-center py-5" *ngIf="loading">
+    <div class="hp-spinner hp-spinner--lg"></div>
   </div>
 
-  <div class="text-center py-5" *ngIf="!loading && bookings.length === 0">
-    <i class="bi bi-calendar-x fs-1 text-muted"></i>
-    <h4 class="mt-3 text-muted">No bookings yet</h4>
-    <a routerLink="/hotels" class="btn btn-primary-custom mt-3">
-      <i class="bi bi-search me-2"></i>Browse Hotels
-    </a>
+  <div class="hp-empty-state" *ngIf="!loading && bookings.length === 0">
+    <i class="bi bi-calendar-x hp-empty-icon"></i>
+    <h4>No bookings yet</h4>
+    <p>Browse hotels and make your first booking</p>
+    <a routerLink="/hotels" class="hp-btn hp-btn--primary mt-2">Browse Hotels</a>
   </div>
 
-  <div class="card border-0 shadow-sm rounded-3 mb-4" *ngFor="let b of bookings">
-    <div class="card-body p-4">
-      <div class="row align-items-center">
-        <div class="col-md-8">
-          <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
-            <h5 class="fw-bold mb-0">{{ b.hotelName }}</h5>
-            <span [class]="b.status === 'Confirmed' ? 'badge-confirmed' : 'badge-cancelled'">
-              {{ b.status }}
-            </span>
-            <span class="text-muted small">#{{ b.id }}</span>
-          </div>
-
-          <p class="text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ b.hotelLocation }}</p>
-
-          <div class="row g-2 text-sm">
-            <div class="col-auto">
-              <span class="badge bg-light text-dark border">
-                <i class="bi bi-door-open me-1"></i>{{ b.roomType }} — Room {{ b.roomNumber }}
-              </span>
-            </div>
-            <div class="col-auto">
-              <span class="badge bg-light text-dark border">
-                <i class="bi bi-calendar me-1"></i>{{ b.checkInDate | date:'MMM dd' }} → {{ b.checkOutDate | date:'MMM dd, yyyy' }}
-              </span>
-            </div>
-            <div class="col-auto">
-              <span class="badge bg-light text-dark border">
-                <i class="bi bi-moon me-1"></i>{{ nights(b) }} nights
-              </span>
-            </div>
-          </div>
-
-          <p class="text-muted small mt-2 mb-0" *ngIf="b.specialRequests">
-            <i class="bi bi-chat-dots me-1"></i>{{ b.specialRequests }}
-          </p>
-        </div>
-
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-          <div class="fs-3 fw-bold text-primary">${{ b.totalAmount | number:'1.2-2' }}</div>
-          <div class="text-muted small mb-3">Booked {{ b.createdAt | date:'MMM dd, yyyy' }}</div>
-          <button class="btn btn-outline-danger btn-sm"
-                  *ngIf="b.status === 'Confirmed'"
-                  (click)="cancel(b.id)"
-                  [disabled]="cancelling === b.id">
-            <span class="spinner-border spinner-border-sm me-1" *ngIf="cancelling === b.id"></span>
-            <i class="bi bi-x-circle me-1" *ngIf="cancelling !== b.id"></i>
-            {{ cancelling === b.id ? 'Cancelling...' : 'Cancel Booking' }}
-          </button>
-          <div class="text-muted small" *ngIf="b.status === 'Cancelled'">
-            Cancelled {{ b.cancelledAt | date:'MMM dd, yyyy' }}
-          </div>
-        </div>
+  <div class="hp-booking-card" *ngFor="let b of bookings"
+       [class.hp-booking-card--cancelled]="b.status === 'Cancelled'">
+    <div class="hp-booking-card__left">
+      <div class="hp-booking-card__header">
+        <h4>{{ b.hotelName }}</h4>
+        <span class="hp-status-pill hp-status-pill--{{ b.status === 'Confirmed' ? 'success' : 'danger' }}">
+          {{ b.status }}
+        </span>
+        <span class="hp-booking-id">#{{ b.id }}</span>
       </div>
+      <p class="hp-booking-loc"><i class="bi bi-geo-alt me-1"></i>{{ b.hotelLocation }}</p>
+      <div class="hp-booking-tags">
+        <span class="hp-tag">
+          <i class="bi bi-door-open me-1"></i>{{ b.roomType }} #{{ b.roomNumber }}
+        </span>
+        <span class="hp-tag">
+          <i class="bi bi-calendar3 me-1"></i>
+          {{ b.checkInDate | date:'MMM d' }} → {{ b.checkOutDate | date:'MMM d, yyyy' }}
+        </span>
+        <span class="hp-tag"><i class="bi bi-moon me-1"></i>{{ nights(b) }} nights</span>
+        <span class="hp-tag" *ngIf="b.quantity > 1">
+          <i class="bi bi-layers me-1"></i>{{ b.quantity }} rooms
+        </span>
+      </div>
+    </div>
+    <div class="hp-booking-card__right">
+      <div class="hp-booking-amount">₹{{ b.totalAmount | number:'1.2-2' }}</div>
+      <div class="hp-booking-date text-muted">{{ b.createdAt | date:'MMM d, yyyy' }}</div>
+      <button class="hp-btn hp-btn--danger hp-btn--sm mt-2"
+              *ngIf="b.status === 'Confirmed'"
+              (click)="cancel(b.id)" [disabled]="cancelling === b.id">
+        <span class="hp-spinner hp-spinner--sm" *ngIf="cancelling === b.id"></span>
+        <i class="bi bi-x-circle me-1" *ngIf="cancelling !== b.id"></i>
+        Cancel
+      </button>
     </div>
   </div>
 </div>

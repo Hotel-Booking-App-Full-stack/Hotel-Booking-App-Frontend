@@ -1,64 +1,62 @@
-<div class="page-header">
-  <div class="container d-flex justify-content-between align-items-center">
+<div class="hp-admin-content">
+  <div class="hp-admin-header">
     <div>
-      <h1><i class="bi bi-building me-3"></i>Manage Hotels</h1>
-      <p>Add and manage hotel listings</p>
+      <h2 class="hp-admin-title"><i class="bi bi-building me-2"></i>Manage Hotels</h2>
+      <p class="hp-admin-subtitle">Add and manage hotel listings</p>
     </div>
-    <button class="btn btn-light fw-bold px-4" (click)="openAdd()">
+    <button class="hp-btn hp-btn--primary" (click)="openAdd()">
       <i class="bi bi-plus-circle me-2"></i>Add Hotel
     </button>
   </div>
-</div>
 
-<div class="container pb-5">
-  <!-- Modal-style form -->
-  <div class="card border-0 shadow rounded-3 mb-4 p-4" *ngIf="showForm">
-    <h5 class="fw-bold mb-4">{{ editingHotel ? 'Edit Hotel' : 'Add New Hotel' }}</h5>
-    <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+  <!-- Form -->
+  <div class="hp-admin-form-panel" *ngIf="showForm">
+    <h5 class="fw-semibold mb-4">{{ editingHotel ? 'Edit Hotel' : 'Add New Hotel' }}</h5>
+    <div class="hp-alert hp-alert--danger mb-3" *ngIf="error">{{ error }}</div>
     <div class="row g-3">
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Name *</label>
-        <input [(ngModel)]="formData.name" class="form-control form-control-custom" placeholder="Hotel name">
+        <label class="hp-label">Name *</label>
+        <input [(ngModel)]="formData.name" class="hp-input hp-input--full" placeholder="Hotel name">
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Location *</label>
-        <input [(ngModel)]="formData.location" class="form-control form-control-custom" placeholder="City, Country">
+        <label class="hp-label">Location *</label>
+        <input [(ngModel)]="formData.location" class="hp-input hp-input--full" placeholder="City, Country">
       </div>
       <div class="col-md-8">
-        <label class="form-label fw-semibold">Description</label>
-        <textarea [(ngModel)]="formData.description" class="form-control form-control-custom" rows="2"></textarea>
+        <label class="hp-label">Description</label>
+        <textarea [(ngModel)]="formData.description" class="hp-input hp-input--full hp-textarea" rows="2"></textarea>
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-semibold">Star Rating</label>
-        <select [(ngModel)]="formData.starRating" class="form-select form-control-custom">
+        <label class="hp-label">Star Rating</label>
+        <select [(ngModel)]="formData.starRating" class="hp-select hp-select--full">
           <option [value]="i" *ngFor="let i of [1,2,3,4,5]">{{ i }} Star{{ i > 1 ? 's' : '' }}</option>
         </select>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Amenities (comma-separated)</label>
-        <input [(ngModel)]="formData.amenities" class="form-control form-control-custom" placeholder="WiFi, Pool, Gym">
+        <label class="hp-label">Amenities (comma-separated)</label>
+        <input [(ngModel)]="formData.amenities" class="hp-input hp-input--full" placeholder="WiFi, Pool, Gym">
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Image URL</label>
-        <input [(ngModel)]="formData.imageUrl" class="form-control form-control-custom" placeholder="https://...">
+        <label class="hp-label">Image URL</label>
+        <input [(ngModel)]="formData.imageUrl" class="hp-input hp-input--full" placeholder="https://...">
       </div>
     </div>
     <div class="d-flex gap-2 mt-4">
-      <button class="btn btn-primary-custom" (click)="save()" [disabled]="saving">
-        <span class="spinner-border spinner-border-sm me-2" *ngIf="saving"></span>
+      <button class="hp-btn hp-btn--primary" (click)="save()" [disabled]="saving">
+        <span class="hp-spinner" *ngIf="saving"></span>
         {{ saving ? 'Saving...' : 'Save Hotel' }}
       </button>
-      <button class="btn btn-outline-secondary" (click)="showForm = false">Cancel</button>
+      <button class="hp-btn hp-btn--ghost" (click)="showForm = false">Cancel</button>
     </div>
   </div>
 
   <!-- Table -->
-  <div class="text-center py-5" *ngIf="loading">
-    <div class="spinner-border text-primary"></div>
+  <div class="hp-state-center py-5" *ngIf="loading">
+    <div class="hp-spinner hp-spinner--lg"></div>
   </div>
 
-  <div class="table-responsive" *ngIf="!loading">
-    <table class="table table-modern">
+  <div class="hp-table-wrap" *ngIf="!loading">
+    <table class="hp-table">
       <thead>
         <tr>
           <th>Hotel</th>
@@ -80,24 +78,30 @@
             </div>
           </td>
           <td>{{ h.location }}</td>
-          <td><span class="stars" style="font-size:0.9rem">
+          <td><span style="font-size:0.9rem">
             <ng-container *ngFor="let _ of getStarArray(h.starRating)">★</ng-container>
           </span></td>
           <td>{{ h.roomCount }}</td>
-          <td>${{ h.minPrice }}</td>
-          <td><span [class]="h.isActive ? 'badge-available' : 'badge-unavailable'">
+          <td>₹{{ h.minPrice }}</td>
+          <td><span [class]="h.isActive ? 'hp-badge hp-badge--success' : 'hp-badge hp-badge--danger'">
             {{ h.isActive ? 'Active' : 'Inactive' }}
           </span></td>
           <td>
-            <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(h)">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="delete(h.id)">
-              <i class="bi bi-trash"></i>
-            </button>
+            <div class="hp-action-btns">
+              <button class="hp-btn hp-btn--icon hp-btn--icon-edit" (click)="openEdit(h)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="hp-btn hp-btn--icon hp-btn--icon-delete" (click)="delete(h.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+    <div class="hp-empty-state hp-empty-state--sm" *ngIf="hotels.length === 0">
+      <i class="bi bi-building hp-empty-icon"></i>
+      <p>No hotels found</p>
+    </div>
   </div>
 </div>

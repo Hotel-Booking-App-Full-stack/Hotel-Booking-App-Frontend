@@ -16,6 +16,7 @@ export interface AuthResponse {
   role: string;
   userId: number;
   expiresAt: string;
+  isEmailVerified: boolean;
 }
 
 export interface UserDto {
@@ -24,5 +25,7 @@ export interface UserDto {
   email: string;
   role: string;
   isActive: boolean;
+  isEmailVerified: boolean;
   createdAt: string;
+  bookingCount: number;
 }

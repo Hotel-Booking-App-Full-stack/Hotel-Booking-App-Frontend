@@ -1,0 +1,81 @@
+<div class="hp-admin-content">
+  <div class="hp-admin-header">
+    <div>
+      <h2 class="hp-admin-title"><i class="bi bi-people me-2"></i>Manage Users</h2>
+      <p class="hp-admin-subtitle">{{ users.length }} registered users</p>
+    </div>
+  </div>
+
+  <div class="hp-filter-panel mb-4">
+    <div class="hp-filter-panel__row">
+      <select [(ngModel)]="filterRole" class="hp-select">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="User">User</option>
+      </select>
+      <select [(ngModel)]="filterVerified" class="hp-select">
+        <option value="">All Verification</option>
+        <option value="yes">Verified</option>
+        <option value="no">Pending</option>
+      </select>
+      <span class="hp-filter-count">{{ filtered.length }} shown</span>
+    </div>
+  </div>
+
+  <div class="hp-table-wrap">
+    <table class="hp-table">
+      <thead>
+        <tr>
+          <th>User</th><th>Email</th><th>Role</th>
+          <th>Verified</th><th>Bookings</th><th>Status</th>
+          <th>Joined</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filtered">
+          <td>
+            <div class="hp-user-cell">
+              <div class="hp-user-avatar">{{ initials(u.fullName) }}</div>
+              <span class="fw-semibold">{{ u.fullName }}</span>
+            </div>
+          </td>
+          <td class="text-muted">{{ u.email }}</td>
+          <td>
+            <span class="hp-role-badge" [class.hp-role-badge--admin]="u.role === 'Admin'">
+              {{ u.role }}
+            </span>
+          </td>
+          <td>
+            <span class="hp-badge" [class.hp-badge--success]="u.isEmailVerified"
+                  [class.hp-badge--muted]="!u.isEmailVerified">
+              <i class="bi" [class.bi-check-circle-fill]="u.isEmailVerified"
+                 [class.bi-clock]="!u.isEmailVerified" style="font-size:11px"></i>
+              {{ u.isEmailVerified ? 'Verified' : 'Pending' }}
+            </span>
+          </td>
+          <td>
+            <span class="hp-badge hp-badge--info">{{ u.bookingCount }}</span>
+          </td>
+          <td>
+            <span class="hp-badge" [class.hp-badge--success]="u.isActive"
+                  [class.hp-badge--danger]="!u.isActive">
+              {{ u.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ u.createdAt | date:'MMM d, yyyy' }}</td>
+          <td>
+            <div class="hp-action-btns">
+              <button class="hp-btn hp-btn--icon hp-btn--icon-edit"
+                      (click)="toggle(u.id)" [title]="u.isActive ? 'Deactivate' : 'Activate'">
+                <i class="bi" [class.bi-toggle-on]="u.isActive" [class.bi-toggle-off]="!u.isActive"></i>
+              </button>
+              <button class="hp-btn hp-btn--icon hp-btn--icon-delete" (click)="delete(u.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

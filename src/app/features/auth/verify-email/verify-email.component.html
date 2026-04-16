@@ -1,0 +1,35 @@
+<div class="hp-auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="hp-auth-brand">
+          <div class="hp-logo-icon"><i class="bi bi-building"></i></div>
+          <div class="hp-logo-text">HotelPro</div>
+        </div>
+        <div class="hp-auth-card">
+          <div class="hp-auth-card__body text-center py-5">
+            <ng-container *ngIf="status === 'loading'">
+              <div class="hp-spinner hp-spinner--lg mx-auto mb-4"></div>
+              <h3>Verifying your email...</h3>
+            </ng-container>
+            <ng-container *ngIf="status === 'success'">
+              <div class="hp-verify-icon hp-verify-icon--success mx-auto mb-4">
+                <i class="bi bi-check-lg"></i>
+              </div>
+              <h3 class="fw-bold mb-2">Email Verified!</h3>
+              <p class="text-muted">Redirecting to login...</p>
+            </ng-container>
+            <ng-container *ngIf="status === 'error'">
+              <div class="hp-verify-icon hp-verify-icon--error mx-auto mb-4">
+                <i class="bi bi-x-lg"></i>
+              </div>
+              <h3 class="fw-bold mb-2">Verification Failed</h3>
+              <p class="text-muted mb-4">This link is invalid or expired.</p>
+              <a routerLink="/login" class="hp-btn hp-btn--primary">Back to Login</a>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+<div class="hp-admin-content">
+  <div class="hp-admin-header">
+    <div>
+      <h2 class="hp-admin-title"><i class="bi bi-door-open me-2"></i>Room Inventory</h2>
+      <p class="hp-admin-subtitle">Manage rooms and track availability across all hotels</p>
+    </div>
+    <button class="hp-btn hp-btn--primary" (click)="openAdd()">
+      <i class="bi bi-plus-circle me-2"></i>Add Room
+    </button>
+  </div>
+
+  <!-- Stats row -->
+  <div class="hp-mini-stats-row mb-4" *ngIf="stats">
+    <div class="hp-mini-stat">
+      <div class="hp-mini-stat__val">{{ stats.totalRoomEntries }}</div>
+      <div class="hp-mini-stat__lbl">Room Types</div>
+    </div>
+    <div class="hp-mini-stat">
+      <div class="hp-mini-stat__val">{{ stats.totalRoomsCapacity }}</div>
+      <div class="hp-mini-stat__lbl">Total Rooms</div>
+    </div>
+    <div class="hp-mini-stat hp-mini-stat--success">
+      <div class="hp-mini-stat__val">{{ stats.totalAvailable }}</div>
+      <div class="hp-mini-stat__lbl">Available</div>
+    </div>
+    <div class="hp-mini-stat hp-mini-stat--warning">
+      <div class="hp-mini-stat__val">{{ stats.totalBooked }}</div>
+      <div class="hp-mini-stat__lbl">Currently Booked</div>
+    </div>
+    <ng-container *ngFor="let t of stats?.byType || []">
+      <div class="hp-mini-stat">
+        <div class="hp-mini-stat__val">{{ t.totalRooms }}</div>
+        <div class="hp-mini-stat__lbl">{{ t.roomType }}</div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Form -->
+  <div class="hp-admin-form-panel" *ngIf="showForm">
+    <h5 class="fw-semibold mb-4">{{ editingId ? 'Edit Room' : 'Add New Room' }}</h5>
+    <div class="hp-alert hp-alert--danger mb-3" *ngIf="error">{{ error }}</div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="hp-label">Hotel *</label>
+        <select [(ngModel)]="formData.hotelId" class="hp-select hp-select--full">
+          <option [value]="h.id" *ngFor="let h of hotels">{{ h.name }}</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="hp-label">Room Type *</label>
+        <select [(ngModel)]="formData.roomType" class="hp-select hp-select--full">
+          <option>Standard</option><option>Deluxe</option><option>Suite</option>
+          <option>Executive</option><option>Family</option><option>Penthouse</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="hp-label">Room Number *</label>
+        <input [(ngModel)]="formData.roomNumber" class="hp-input hp-input--full" placeholder="e.g. 101">
+      </div>
+      <div class="col-md-3">
+        <label class="hp-label">Price/Night (₹)</label>
+        <input type="number" [(ngModel)]="formData.pricePerNight" class="hp-input hp-input--full">
+      </div>
+      <div class="col-md-3">
+        <label class="hp-label">Max Occupancy</label>
+        <input type="number" [(ngModel)]="formData.maxOccupancy" class="hp-input hp-input--full" min="1" max="20">
+      </div>
+      <div class="col-md-3">
+        <label class="hp-label">Total Rooms of This Type</label>
+        <input type="number" [(ngModel)]="formData.totalRooms" class="hp-input hp-input--full" min="1" max="200">
+      </div>
+      <div class="col-md-3">
+        <label class="hp-label">Description</label>
+        <input [(ngModel)]="formData.description" class="hp-input hp-input--full" placeholder="Optional">
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-4">
+      <button class="hp-btn hp-btn--primary" (click)="save()" [disabled]="saving">
+        <span class="hp-spinner" *ngIf="saving"></span>
+        {{ saving ? 'Saving...' : (editingId ? 'Update Room' : 'Add Room') }}
+      </button>
+      <button class="hp-btn hp-btn--ghost" (click)="showForm = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="hp-filter-panel mb-4">
+    <div class="hp-filter-panel__row">
+      <select [(ngModel)]="filterHotel" class="hp-select">
+        <option [value]="0">All Hotels</option>
+        <option [value]="h.id" *ngFor="let h of hotels">{{ h.name }}</option>
+      </select>
+      <select [(ngModel)]="filterType" class="hp-select">
+        <option value="">All Types</option>
+        <option *ngFor="let t of allTypes" [value]="t">{{ t }}</option>
+      </select>
+      <select [(ngModel)]="filterStatus" class="hp-select">
+        <option value="">All Status</option>
+        <option value="available">Has Availability</option>
+        <option value="booked">Fully Booked</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="hp-table-wrap">
+    <table class="hp-table">
+      <thead>
+        <tr>
+          <th>Hotel</th><th>Type</th><th>Room #</th>
+          <th>Price/Night</th><th>Capacity</th><th>Inventory</th>
+          <th>Available</th><th>Booked</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of filtered">
+          <td>{{ r.hotelName }}</td>
+          <td><span class="hp-type-badge">{{ r.roomType }}</span></td>
+          <td class="fw-semibold">#{{ r.roomNumber }}</td>
+          <td class="hp-price-cell">₹{{ r.pricePerNight }}</td>
+          <td>{{ r.maxOccupancy }} guests</td>
+          <td>
+            <div class="hp-inv-bar hp-inv-bar--table">
+              <div class="hp-inv-bar__fill"
+                   [style.width.%]="(r.availableCount / r.totalRooms) * 100"
+                   [class.low]="r.availableCount / r.totalRooms <= 0.3"
+                   [class.none]="r.availableCount === 0"></div>
+            </div>
+            <span class="hp-inv-text">{{ r.availableCount }}/{{ r.totalRooms }}</span>
+          </td>
+          <td>
+            <span class="hp-badge hp-badge--success">{{ r.availableCount }}</span>
+          </td>
+          <td>
+            <span class="hp-badge hp-badge--warning">{{ r.bookedCount }}</span>
+          </td>
+          <td>
+            <div class="hp-action-btns">
+              <button class="hp-btn hp-btn--icon hp-btn--icon-edit" (click)="openEdit(r)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="hp-btn hp-btn--icon hp-btn--icon-delete" (click)="delete(r.id)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="hp-empty-state hp-empty-state--sm" *ngIf="!loading && filtered.length === 0">
+      <i class="bi bi-door-closed hp-empty-icon"></i>
+      <p>No rooms match your filters</p>
+    </div>
+  </div>
+</div>

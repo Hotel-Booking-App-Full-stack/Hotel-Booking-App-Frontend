@@ -1,96 +1,84 @@
-<!-- Hero Header -->
-<div class="page-header">
-  <div class="container text-center">
-    <h1><i class="bi bi-building me-3"></i>Find Your Perfect Hotel</h1>
-    <p>Discover amazing hotels at the best prices</p>
-
-    <!-- Search bar -->
-    <div class="row justify-content-center mt-4">
-      <div class="col-md-6">
-        <div class="input-group input-group-lg shadow">
-          <input type="text" class="form-control" placeholder="Search by city or location..."
-                 [(ngModel)]="searchLocation" (keyup.enter)="search()">
-          <button class="btn btn-warning fw-bold px-4" (click)="search()">
-            <i class="bi bi-search me-1"></i>Search
-          </button>
+<!-- Hero -->
+<section class="hp-hero">
+  <div class="container">
+    <div class="hp-hero__content">
+      <span class="hp-hero__eyebrow">Premium Hotel Bookings</span>
+      <h1 class="hp-hero__title">Find Your Perfect Stay</h1>
+      <p class="hp-hero__sub">Discover world-class hotels at the best prices</p>
+      <div class="hp-hero__search">
+        <div class="hp-search-bar">
+          <i class="bi bi-search hp-search-icon"></i>
+          <input type="text" [(ngModel)]="searchLoc" (keyup.enter)="load()"
+                 class="hp-search-input" placeholder="Search city or location...">
+          <button class="hp-btn hp-btn--primary" (click)="load()">Search</button>
         </div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<div class="container pb-5">
-  <!-- Filter row -->
-  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
-    <span class="fw-semibold text-muted">Filter by stars:</span>
-    <button *ngFor="let s of stars"
-            class="btn btn-sm"
-            [class.btn-warning]="selectedStars === s"
-            [class.btn-outline-warning]="selectedStars !== s"
-            (click)="selectedStars = selectedStars === s ? null : s; loadHotels()">
-      <ng-container *ngFor="let _ of getStarArray(s)">★</ng-container>
-    </button>
-    <button class="btn btn-sm btn-outline-secondary ms-auto" (click)="clearFilters()">
+<div class="container hp-section">
+  <!-- Filters -->
+  <div class="hp-filter-row">
+    <div class="hp-filter-label"><i class="bi bi-funnel me-2"></i>Filter by stars</div>
+    <div class="hp-star-filters">
+      <button *ngFor="let s of [1,2,3,4,5]"
+              class="hp-star-btn"
+              [class.hp-star-btn--active]="selectedStars === s"
+              (click)="selectedStars = selectedStars === s ? null : s; load()">
+        <span *ngFor="let _ of stars(s)">★</span>
+      </button>
+    </div>
+    <button class="hp-btn hp-btn--ghost hp-btn--sm ms-auto" (click)="clearFilters()">
       <i class="bi bi-x-circle me-1"></i>Clear
     </button>
   </div>
 
   <!-- Loading -->
-  <div class="text-center py-5" *ngIf="loading">
-    <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
-    <p class="mt-3 text-muted">Finding hotels...</p>
+  <div class="hp-state-center" *ngIf="loading">
+    <div class="hp-spinner hp-spinner--lg"></div>
+    <p class="mt-3">Finding hotels...</p>
   </div>
 
-  <!-- Empty state -->
-  <div class="text-center py-5" *ngIf="!loading && hotels.length === 0">
-    <i class="bi bi-search fs-1 text-muted"></i>
-    <h4 class="mt-3 text-muted">No hotels found</h4>
-    <p class="text-muted">Try a different location or clear your filters.</p>
-    <button class="btn btn-primary-custom" (click)="clearFilters()">View All Hotels</button>
+  <!-- Empty -->
+  <div class="hp-empty-state" *ngIf="!loading && hotels.length === 0">
+    <i class="bi bi-building-x hp-empty-icon"></i>
+    <h4>No hotels found</h4>
+    <p>Try a different location or clear your filters</p>
+    <button class="hp-btn hp-btn--primary" (click)="clearFilters()">View All Hotels</button>
   </div>
 
-  <!-- Hotel grid -->
-  <div class="row g-4" *ngIf="!loading">
-    <div class="col-md-6 col-lg-4" *ngFor="let hotel of hotels">
-      <div class="hotel-card card h-100">
-        <img [src]="hotel.imageUrl || 'https://via.placeholder.com/400x220?text=Hotel'"
-             class="card-img-top" [alt]="hotel.name"
-             onerror="this.src='https://via.placeholder.com/400x220?text=Hotel'">
-
-        <div class="card-body d-flex flex-column">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <h5 class="card-title fw-bold mb-0">{{ hotel.name }}</h5>
-            <div class="stars">
-              <ng-container *ngFor="let _ of getStarArray(hotel.starRating)">★</ng-container>
-            </div>
+  <!-- Grid -->
+  <div class="hp-hotel-grid" *ngIf="!loading && hotels.length > 0">
+    <div class="hp-hotel-card" *ngFor="let h of hotels">
+      <div class="hp-hotel-card__img-wrap">
+        <img [src]="h.imageUrl" [alt]="h.name"
+             onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600'">
+        <div class="hp-hotel-card__stars">
+          <span *ngFor="let _ of stars(h.starRating)">★</span>
+        </div>
+        <div class="hp-hotel-card__price">
+          ₹{{ h.minPrice }}<span>/night</span>
+        </div>
+      </div>
+      <div class="hp-hotel-card__body">
+        <h3 class="hp-hotel-card__name">{{ h.name }}</h3>
+        <p class="hp-hotel-card__location">
+          <i class="bi bi-geo-alt-fill me-1"></i>{{ h.location }}
+        </p>
+        <p class="hp-hotel-card__desc">{{ h.description | slice:0:90 }}...</p>
+        <div class="hp-hotel-card__tags">
+          <span class="hp-tag" *ngFor="let a of (h.amenities?.split(',') || []).slice(0,3)">
+            {{ a.trim() }}
+          </span>
+        </div>
+        <div class="hp-hotel-card__footer">
+          <div class="hp-rooms-count">
+            <i class="bi bi-door-open me-1"></i>{{ h.roomCount }} rooms
           </div>
-
-          <p class="text-muted small mb-2">
-            <i class="bi bi-geo-alt me-1"></i>{{ hotel.location }}
-          </p>
-
-          <p class="card-text text-muted small flex-grow-1">
-            {{ hotel.description | slice:0:100 }}{{ (hotel.description?.length ?? 0) > 100 ? '...' : '' }}
-          </p>
-
-          <div class="d-flex flex-wrap gap-1 mb-3">
-            <ng-container *ngFor="let amenity of (hotel.amenities?.split(',') || []).slice(0,3)">
-              <span class="badge bg-light text-dark border">{{ amenity.trim() }}</span>
-            </ng-container>
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center border-top pt-3">
-            <div>
-              <div class="text-muted small">From</div>
-              <div class="fw-bold fs-5 text-primary">${{ hotel.minPrice | number:'1.0-0' }}<span class="text-muted small">/night</span></div>
-            </div>
-            <div class="text-end">
-              <div class="text-muted small mb-1">{{ hotel.roomCount }} rooms</div>
-              <a [routerLink]="['/hotels', hotel.id]" class="btn btn-primary-custom btn-sm">
-                View Details <i class="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
-          </div>
+          <a [routerLink]="['/hotels', h.id]" class="hp-btn hp-btn--primary hp-btn--sm">
+            View Details <i class="bi bi-arrow-right ms-1"></i>
+          </a>
         </div>
       </div>
     </div>
