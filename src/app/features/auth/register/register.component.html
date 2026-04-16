@@ -1,73 +1,69 @@
-<div class="auth-wrapper">
+<div class="hp-auth-page">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-md-5">
-        <div class="auth-card">
-          <div class="auth-header">
-            <i class="bi bi-person-plus fs-1 mb-2 d-block"></i>
-            <h2>Create Account</h2>
-            <p>Join us to start booking</p>
+      <div class="col-md-5 col-lg-4">
+
+        <div class="hp-auth-brand">
+          <div class="hp-logo-icon"><i class="bi bi-building"></i></div>
+          <div class="hp-logo-text">HotelPro</div>
+        </div>
+
+        <div class="hp-auth-card" *ngIf="!success">
+          <div class="hp-auth-card__header">
+            <h1>Create account</h1>
+            <p>Join HotelPro today</p>
           </div>
-
-          <div class="auth-body">
-            <div class="alert alert-danger" *ngIf="error">
-              <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+          <div class="hp-auth-card__body">
+            <div class="hp-alert hp-alert--danger" *ngIf="error">
+              <i class="bi bi-exclamation-circle-fill"></i>{{ error }}
             </div>
-
             <form [formGroup]="form" (ngSubmit)="submit()">
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Full Name</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-person"></i></span>
-                  <input formControlName="fullName" type="text" class="form-control form-control-custom"
-                         placeholder="John Doe">
+              <div class="hp-field mb-3">
+                <label class="hp-label">Full name</label>
+                <div class="hp-input-group">
+                  <i class="bi bi-person hp-input-icon"></i>
+                  <input formControlName="fullName" type="text" class="hp-input" placeholder="John Doe">
                 </div>
-                <div class="text-danger small mt-1"
-                     *ngIf="form.get('fullName')?.invalid && form.get('fullName')?.touched">
-                  Minimum 3 characters required.
-                </div>
+                <span class="hp-field-error" *ngIf="f['fullName'].invalid && f['fullName'].touched">Min 2 characters</span>
               </div>
-
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Email Address</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                  <input formControlName="email" type="email" class="form-control form-control-custom"
-                         placeholder="you@example.com">
+              <div class="hp-field mb-3">
+                <label class="hp-label">Email address</label>
+                <div class="hp-input-group">
+                  <i class="bi bi-envelope hp-input-icon"></i>
+                  <input formControlName="email" type="email" class="hp-input" placeholder="you@example.com">
                 </div>
-                <div class="text-danger small mt-1"
-                     *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-                  Valid email required.
-                </div>
+                <span class="hp-field-error" *ngIf="f['email'].invalid && f['email'].touched">Valid email required</span>
               </div>
-
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Password</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                  <input formControlName="password" type="password" class="form-control form-control-custom"
-                         placeholder="Min 6 characters">
+              <div class="hp-field mb-4">
+                <label class="hp-label">Password</label>
+                <div class="hp-input-group">
+                  <i class="bi bi-lock hp-input-icon"></i>
+                  <input formControlName="password" type="password" class="hp-input" placeholder="Min 6 characters">
                 </div>
-                <div class="text-danger small mt-1"
-                     *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
-                  Minimum 6 characters required.
-                </div>
+                <span class="hp-field-error" *ngIf="f['password'].invalid && f['password'].touched">Min 6 characters</span>
               </div>
-
-              <button type="submit" class="btn btn-primary-custom w-100 py-3" [disabled]="loading">
-                <span class="spinner-border spinner-border-sm me-2" *ngIf="loading"></span>
-                <i class="bi bi-person-check me-2" *ngIf="!loading"></i>
+              <button type="submit" class="hp-btn hp-btn--primary hp-btn--full" [disabled]="loading">
+                <span class="hp-spinner" *ngIf="loading"></span>
+                <i class="bi bi-person-check" *ngIf="!loading"></i>
                 {{ loading ? 'Creating...' : 'Create Account' }}
               </button>
             </form>
-
-            <hr class="my-4">
-            <p class="text-center mb-0">
-              Already have an account?
-              <a routerLink="/login" class="text-primary fw-semibold">Sign in</a>
-            </p>
+          </div>
+          <div class="hp-auth-card__footer">
+            Already have an account? <a routerLink="/login" class="hp-link">Sign in</a>
           </div>
         </div>
+
+        <div class="hp-auth-card" *ngIf="success">
+          <div class="hp-auth-card__body text-center py-4">
+            <div class="hp-verify-icon hp-verify-icon--success mx-auto mb-3">
+              <i class="bi bi-envelope-check-fill"></i>
+            </div>
+            <h3 class="fw-bold mb-2">Check your email!</h3>
+            <p class="text-muted">We've sent a verification link and welcome email. Redirecting...</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

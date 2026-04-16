@@ -1,0 +1,66 @@
+<div class="hp-admin-layout">
+  <!-- Sidebar -->
+  <aside class="hp-sidebar">
+    <!-- Brand -->
+    <div class="hp-sidebar__brand">
+      <div class="hp-sidebar__logo"><i class="bi bi-building"></i></div>
+      <div>
+        <div class="hp-sidebar__name">HotelPro</div>
+        <div class="hp-sidebar__role">Admin Panel</div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="hp-sidebar__nav">
+      <div class="hp-sidebar__section">Main</div>
+
+      <a class="hp-sidebar__item" routerLink="/admin" routerLinkActive="hp-sidebar__item--active"
+         [routerLinkActiveOptions]="{exact:true}">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a class="hp-sidebar__item" routerLink="/admin/hotels" routerLinkActive="hp-sidebar__item--active">
+        <i class="bi bi-building"></i><span>Hotels</span>
+      </a>
+
+      <div class="hp-sidebar__section">Room Management</div>
+
+      <a class="hp-sidebar__item" routerLink="/admin/rooms" routerLinkActive="hp-sidebar__item--active">
+        <i class="bi bi-door-open"></i><span>Room Inventory</span>
+      </a>
+
+      <div class="hp-sidebar__section">Bookings & Users</div>
+
+      <a class="hp-sidebar__item" routerLink="/admin/bookings" routerLinkActive="hp-sidebar__item--active">
+        <i class="bi bi-calendar-check"></i><span>All Bookings</span>
+      </a>
+      <a class="hp-sidebar__item" routerLink="/admin/users" routerLinkActive="hp-sidebar__item--active">
+        <i class="bi bi-people"></i><span>Users</span>
+      </a>
+
+      <div class="hp-sidebar__section">Account</div>
+      <a class="hp-sidebar__item" routerLink="/hotels">
+        <i class="bi bi-arrow-left-circle"></i><span>Back to Site</span>
+      </a>
+      <button class="hp-sidebar__item hp-sidebar__item--logout w-100 text-start border-0"
+              (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+      </button>
+    </nav>
+
+    <!-- User -->
+    <div class="hp-sidebar__user">
+      <div class="hp-sidebar__avatar">
+        {{ auth.getUser()?.fullName?.charAt(0) | uppercase }}
+      </div>
+      <div class="hp-sidebar__user-info">
+        <div class="hp-sidebar__user-name">{{ auth.getUser()?.fullName }}</div>
+        <div class="hp-sidebar__user-email">{{ auth.getUser()?.email }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="hp-admin-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,54 +1,66 @@
-<div class="page-header">
+<div class="hp-page-header">
   <div class="container">
-    <h1><i class="bi bi-calendar-plus me-3"></i>Book a Room</h1>
-    <p>Complete your reservation details below</p>
+    <h1><i class="bi bi-calendar-plus me-2"></i>Book Your Room</h1>
+    <p>Complete your reservation below</p>
   </div>
 </div>
 
-<div class="container pb-5">
-  <!-- Success -->
-  <div class="alert alert-success rounded-3 py-4 text-center" *ngIf="success">
-    <i class="bi bi-check-circle-fill fs-1 d-block mb-2"></i>
-    <h4>Booking Confirmed!</h4>
-    <p class="mb-0">Redirecting to your bookings...</p>
+<div class="container hp-section">
+  <!-- Success state -->
+  <div class="hp-booking-success" *ngIf="success">
+    <div class="hp-booking-success__icon"><i class="bi bi-check-lg"></i></div>
+    <h2>Booking Confirmed!</h2>
+    <p>A confirmation email has been sent. Redirecting to your bookings...</p>
   </div>
 
   <div class="row g-4" *ngIf="!success">
     <!-- Form -->
     <div class="col-lg-7">
-      <div class="card border-0 shadow-sm rounded-3 p-4">
-        <h4 class="fw-bold mb-4">Reservation Details</h4>
+      <div class="hp-card p-4">
+        <h4 class="hp-card-title mb-4">Reservation Details</h4>
 
-        <div class="alert alert-danger" *ngIf="error">
-          <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        <div class="hp-alert hp-alert--danger mb-3" *ngIf="error">
+          <i class="bi bi-exclamation-circle-fill"></i>{{ error }}
         </div>
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Check-in Date</label>
-              <input type="date" formControlName="checkInDate" class="form-control form-control-custom">
+              <label class="hp-label">Check-in Date</label>
+              <input type="date" formControlName="checkInDate" class="hp-input hp-input--full">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Check-out Date</label>
-              <input type="date" formControlName="checkOutDate" class="form-control form-control-custom">
+              <label class="hp-label">Check-out Date</label>
+              <input type="date" formControlName="checkOutDate" class="hp-input hp-input--full">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="hp-label">
+              Number of Rooms
+              <span class="text-muted ms-1">({{ maxQty }} available)</span>
+            </label>
+            <div class="hp-qty-stepper">
+              <button type="button" class="hp-qty-btn" (click)="adjustQty(-1)">−</button>
+              <input type="number" formControlName="quantity" class="hp-qty-input"
+                     [max]="maxQty" min="1">
+              <button type="button" class="hp-qty-btn" (click)="adjustQty(1)">+</button>
             </div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label fw-semibold">Special Requests (optional)</label>
-            <textarea formControlName="specialRequests" class="form-control form-control-custom" rows="3"
-                      placeholder="Any special requirements..."></textarea>
+            <label class="hp-label">Special Requests <span class="text-muted">(optional)</span></label>
+            <textarea formControlName="specialRequests" class="hp-input hp-input--full hp-textarea"
+                      rows="3" placeholder="Any special requirements..."></textarea>
           </div>
 
-          <div class="alert alert-warning" *ngIf="nights <= 0">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            Check-out must be after check-in.
+          <div class="hp-alert hp-alert--warning mb-3" *ngIf="nights <= 0 && form.value.checkOutDate">
+            <i class="bi bi-exclamation-triangle-fill"></i>Check-out must be after check-in
           </div>
 
-          <button type="submit" class="btn btn-primary-custom w-100 py-3"
+          <button type="submit" class="hp-btn hp-btn--primary hp-btn--full hp-btn--lg"
                   [disabled]="loading || nights <= 0">
-            <span class="spinner-border spinner-border-sm me-2" *ngIf="loading"></span>
+            <span class="hp-spinner" *ngIf="loading"></span>
             <i class="bi bi-check-circle me-2" *ngIf="!loading"></i>
             {{ loading ? 'Processing...' : 'Confirm Booking' }}
           </button>
@@ -57,31 +69,23 @@
     </div>
 
     <!-- Summary -->
-    <div class="col-lg-5">
-      <div class="card border-0 shadow rounded-3 p-4" *ngIf="hotel && room">
-        <h5 class="fw-bold mb-4">Booking Summary</h5>
-
-        <img [src]="hotel.imageUrl" class="w-100 rounded-3 mb-3" style="height:160px;object-fit:cover">
-
-        <h6 class="fw-bold">{{ hotel.name }}</h6>
-        <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i>{{ hotel.location }}</p>
-
-        <div class="border-top pt-3">
-          <div class="d-flex justify-content-between mb-2">
-            <span class="text-muted">Room</span>
-            <span class="fw-semibold">{{ room.roomType }} #{{ room.roomNumber }}</span>
-          </div>
-          <div class="d-flex justify-content-between mb-2">
-            <span class="text-muted">Price per night</span>
-            <span>${{ room.pricePerNight }}</span>
-          </div>
-          <div class="d-flex justify-content-between mb-2">
-            <span class="text-muted">Nights</span>
-            <span>{{ nights }}</span>
-          </div>
-          <div class="d-flex justify-content-between border-top pt-3 mt-2">
-            <span class="fw-bold fs-5">Total</span>
-            <span class="fw-bold fs-5 text-primary">${{ totalAmount | number:'1.2-2' }}</span>
+    <div class="col-lg-5" *ngIf="hotel && room">
+      <div class="hp-booking-summary">
+        <img [src]="hotel.imageUrl" class="hp-booking-summary__img" alt=""
+             onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600'">
+        <div class="hp-booking-summary__body">
+          <h5>{{ hotel.name }}</h5>
+          <p class="hp-booking-summary__loc">
+            <i class="bi bi-geo-alt-fill me-1"></i>{{ hotel.location }}
+          </p>
+          <div class="hp-summary-row"><span>Room type</span><span>{{ room.roomType }}</span></div>
+          <div class="hp-summary-row"><span>Room #</span><span>{{ room.roomNumber }}</span></div>
+          <div class="hp-summary-row"><span>Rate</span><span>₹{{ room.pricePerNight }}/night</span></div>
+          <div class="hp-summary-row"><span>Rooms</span><span>× {{ form.value.quantity }}</span></div>
+          <div class="hp-summary-row"><span>Nights</span><span>× {{ nights }}</span></div>
+          <div class="hp-summary-total">
+            <span>Total</span>
+            <span>₹{{ total | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>

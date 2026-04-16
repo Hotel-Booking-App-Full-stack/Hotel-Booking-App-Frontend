@@ -6,109 +6,70 @@ import { AuthResponse, LoginDto, RegisterDto, UserDto } from '../models/user.mod
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:5079/api/auth';
-  private tokenKey = 'hotel_token';
-  private userKey = 'hotel_user';
-
-  private currentUserSubject = new BehaviorSubject<AuthResponse | null>(this.getStoredUser());
-  currentUser$ = this.currentUserSubject.asObservable();
-
-  private sessionTimer: any;
+  private api = 'http://localhost:5079/api/auth';
+  private TK = 'hp_token'; private UK = 'hp_user';
+  private userSubject = new BehaviorSubject<AuthResponse | null>(this.stored());
+  currentUser$ = this.userSubject.asObservable();
+  private timer: any;
 
   constructor(private http: HttpClient, private router: Router) {
-    if (this.isLoggedIn()) {
-      this.startSessionTimer();
-    }
+    if (this.isLoggedIn()) this.startTimer();
   }
 
   login(dto: LoginDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, dto).pipe(
-      tap(res => {
-        localStorage.setItem(this.tokenKey, res.token);
-        localStorage.setItem(this.userKey, JSON.stringify(res));
-        this.currentUserSubject.next(res);
-        this.startSessionTimer();
-      })
+    return this.http.post<AuthResponse>(`${this.api}/login`, dto).pipe(
+      tap(r => { this.store(r); this.startTimer(); })
     );
   }
 
   register(dto: RegisterDto): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, dto).pipe(
-      tap(res => {
-        localStorage.setItem(this.tokenKey, res.token);
-        localStorage.setItem(this.userKey, JSON.stringify(res));
-        this.currentUserSubject.next(res);
-        this.startSessionTimer();
-      })
+    return this.http.post<AuthResponse>(`${this.api}/register`, dto).pipe(
+      tap(r => { this.store(r); this.startTimer(); })
     );
   }
 
-  logout(reason: string = 'manual'): void {
-    const logoutTime = new Date();
-    console.log(`[SESSION] Logout at: ${logoutTime.toLocaleTimeString()} | Reason: ${reason}`);
+  verifyEmail(token: string, email: string): Observable<any> {
+    return this.http.post(`${this.api}/verify-email`, { token, email });
+  }
 
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
-    this.currentUserSubject.next(null);
-    this.clearSessionTimer();
+  resendVerification(email: string): Observable<any> {
+    return this.http.post(`${this.api}/resend-verification`,
+      JSON.stringify(email), { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  logout(reason = 'manual'): void {
+    console.log(`[SESSION] Logout: ${new Date().toLocaleTimeString()} (${reason})`);
+    localStorage.removeItem(this.TK); localStorage.removeItem(this.UK);
+    this.userSubject.next(null); this.clearTimer();
     this.router.navigate(['/login']);
   }
 
-  private startSessionTimer(): void {
-    this.clearSessionTimer();
-    const SEVEN_MINUTES = 7 * 60 * 1000;
-    const loginTime = new Date();
-    const logoutTime = new Date(loginTime.getTime() + SEVEN_MINUTES);
-
-    console.log(`[SESSION] Started at: ${loginTime.toLocaleTimeString()}`);
-    console.log(`[SESSION] Will expire at: ${logoutTime.toLocaleTimeString()}`);
-
-    this.sessionTimer = setTimeout(() => {
-      console.log(`[SESSION] Auto-logout triggered at: ${new Date().toLocaleTimeString()}`);
+  private startTimer(): void {
+    this.clearTimer();
+    const ms = 7 * 60 * 1000;
+    console.log(`[SESSION] Expires: ${new Date(Date.now() + ms).toLocaleTimeString()}`);
+    this.timer = setTimeout(() => {
+      console.log(`[SESSION] Auto-logout: ${new Date().toLocaleTimeString()}`);
       this.logout('session_expired');
-      alert('Your session has expired. Please log in again.');
-    }, SEVEN_MINUTES);
+      alert('Session expired. Please log in again.');
+    }, ms);
   }
 
-  private clearSessionTimer(): void {
-    if (this.sessionTimer) {
-      clearTimeout(this.sessionTimer);
-      this.sessionTimer = null;
-    }
+  private clearTimer(): void { if (this.timer) { clearTimeout(this.timer); this.timer = null; } }
+  private store(r: AuthResponse): void {
+    localStorage.setItem(this.TK, r.token);
+    localStorage.setItem(this.UK, JSON.stringify(r));
+    this.userSubject.next(r);
   }
+  private stored(): AuthResponse | null {
+    const s = localStorage.getItem(this.UK); return s ? JSON.parse(s) : null;
+  }
+  getToken = (): string | null => localStorage.getItem(this.TK);
+  isLoggedIn = (): boolean => !!this.getToken();
+  isAdmin = (): boolean => this.userSubject.value?.role === 'Admin';
+  getUser = (): AuthResponse | null => this.userSubject.value;
 
-  resetSessionTimer(): void {
-    if (this.isLoggedIn()) {
-      this.startSessionTimer();
-    }
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.getToken();
-  }
-
-  isAdmin(): boolean {
-    return this.currentUserSubject.value?.role === 'Admin';
-  }
-
-  getCurrentUser(): AuthResponse | null {
-    return this.currentUserSubject.value;
-  }
-
-  private getStoredUser(): AuthResponse | null {
-    const stored = localStorage.getItem(this.userKey);
-    return stored ? JSON.parse(stored) : null;
-  }
-
-  getAllUsers(): Observable<UserDto[]> {
-    return this.http.get<UserDto[]>(`${this.apiUrl}/users`);
-  }
-
-  deleteUser(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/users/${id}`);
-  }
+  getUsers(): Observable<UserDto[]> { return this.http.get<UserDto[]>(`${this.api}/users`); }
+  deleteUser(id: number): Observable<any> { return this.http.delete(`${this.api}/users/${id}`); }
+  toggleUser(id: number): Observable<any> { return this.http.patch(`${this.api}/users/${id}/toggle`, {}); }
 }

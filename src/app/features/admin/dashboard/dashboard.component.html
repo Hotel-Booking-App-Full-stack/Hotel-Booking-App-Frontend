@@ -1,105 +1,131 @@
-<div class="page-header">
-  <div class="container">
-    <h1><i class="bi bi-speedometer2 me-3"></i>Admin Dashboard</h1>
-    <p>Overview of your hotel booking platform</p>
-  </div>
-</div>
-
-<div class="container pb-5">
-  <div class="text-center py-5" *ngIf="loading">
-    <div class="spinner-border text-primary" style="width:3rem;height:3rem"></div>
+<div class="hp-admin-content">
+  <div class="hp-admin-header">
+    <div>
+      <h2 class="hp-admin-title">Dashboard</h2>
+      <p class="hp-admin-subtitle">Overview of your hotel platform</p>
+    </div>
   </div>
 
-  <div *ngIf="!loading">
-    <!-- Stats cards -->
-    <div class="row g-4 mb-5">
-      <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 rounded-3 h-100 text-white"
-             style="background: linear-gradient(135deg, #6c5ce7, #5a4bd1)">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="small opacity-75 mb-1">Total Hotels</div>
-                <div class="fs-2 fw-bold">{{ stats.hotels }}</div>
+  <div class="hp-state-center py-5" *ngIf="loading">
+    <div class="hp-spinner hp-spinner--lg"></div>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- Main stats -->
+    <div class="hp-stats-grid mb-4">
+      <div class="hp-stat-card hp-stat-card--slate">
+        <div class="hp-stat-card__icon"><i class="bi bi-building"></i></div>
+        <div class="hp-stat-card__info">
+          <div class="hp-stat-card__label">Total Hotels</div>
+          <div class="hp-stat-card__value">{{ stats.hotels }}</div>
+        </div>
+      </div>
+      <div class="hp-stat-card hp-stat-card--emerald">
+        <div class="hp-stat-card__icon"><i class="bi bi-calendar-check"></i></div>
+        <div class="hp-stat-card__info">
+          <div class="hp-stat-card__label">Total Bookings</div>
+          <div class="hp-stat-card__value">{{ stats.bookings }}</div>
+        </div>
+      </div>
+      <div class="hp-stat-card hp-stat-card--amber">
+        <div class="hp-stat-card__icon"><i class="bi bi-people"></i></div>
+        <div class="hp-stat-card__info">
+          <div class="hp-stat-card__label">Total Users</div>
+          <div class="hp-stat-card__value">{{ stats.users }}</div>
+        </div>
+      </div>
+      <div class="hp-stat-card hp-stat-card--teal">
+        <div class="hp-stat-card__icon"><i class="bi bi-currency-rupee"></i></div>
+        <div class="hp-stat-card__info">
+          <div class="hp-stat-card__label">Total Revenue</div>
+          <div class="hp-stat-card__value">₹{{ stats.revenue | number:'1.0-0' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room stats -->
+    <div class="row g-4 mb-4" *ngIf="roomStats">
+      <div class="col-md-6">
+        <div class="hp-card p-4">
+          <h5 class="hp-card-title mb-3">Room Inventory Summary</h5>
+          <div class="hp-mini-stats-row">
+            <div class="hp-mini-stat">
+              <div class="hp-mini-stat__val">{{ roomStats.totalRoomEntries }}</div>
+              <div class="hp-mini-stat__lbl">Room Types</div>
+            </div>
+            <div class="hp-mini-stat">
+              <div class="hp-mini-stat__val">{{ roomStats.totalRoomsCapacity }}</div>
+              <div class="hp-mini-stat__lbl">Total Rooms</div>
+            </div>
+            <div class="hp-mini-stat hp-mini-stat--success">
+              <div class="hp-mini-stat__val">{{ roomStats.totalAvailable }}</div>
+              <div class="hp-mini-stat__lbl">Available</div>
+            </div>
+            <div class="hp-mini-stat hp-mini-stat--warning">
+              <div class="hp-mini-stat__val">{{ roomStats.totalBooked }}</div>
+              <div class="hp-mini-stat__lbl">Booked</div>
+            </div>
+          </div>
+          <!-- Per type breakdown -->
+          <div class="hp-type-row" *ngFor="let t of roomStats.byType">
+            <div class="hp-type-row__name">{{ t.roomType }}</div>
+            <div class="hp-type-row__bar">
+              <div class="hp-type-bar">
+                <div class="hp-type-bar__fill" [style.width.%]="(t.booked / t.totalRooms) * 100"></div>
               </div>
-              <i class="bi bi-building fs-1 opacity-50"></i>
+            </div>
+            <div class="hp-type-row__nums">
+              <span class="text-success">{{ t.available }}</span>/<span class="text-muted">{{ t.totalRooms }}</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 rounded-3 h-100 text-white"
-             style="background: linear-gradient(135deg, #00b894, #00cec9)">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="small opacity-75 mb-1">Total Bookings</div>
-                <div class="fs-2 fw-bold">{{ stats.bookings }}</div>
-              </div>
-              <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+      <div class="col-md-6">
+        <div class="hp-card p-4">
+          <h5 class="hp-card-title mb-3">Booking Overview</h5>
+          <div class="hp-mini-stats-row mb-3">
+            <div class="hp-mini-stat hp-mini-stat--success">
+              <div class="hp-mini-stat__val">{{ stats.confirmed }}</div>
+              <div class="hp-mini-stat__lbl">Confirmed</div>
+            </div>
+            <div class="hp-mini-stat hp-mini-stat--danger">
+              <div class="hp-mini-stat__val">{{ stats.cancelled }}</div>
+              <div class="hp-mini-stat__lbl">Cancelled</div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 rounded-3 h-100 text-white"
-             style="background: linear-gradient(135deg, #fd79a8, #e84393)">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="small opacity-75 mb-1">Total Users</div>
-                <div class="fs-2 fw-bold">{{ stats.users }}</div>
-              </div>
-              <i class="bi bi-people fs-1 opacity-50"></i>
+          <div class="hp-progress-bar-wrap">
+            <div class="hp-progress-bar">
+              <div class="hp-progress-bar__fill hp-progress-bar__fill--success"
+                   [style.width.%]="(stats.confirmed / stats.bookings) * 100 || 0"></div>
+              <div class="hp-progress-bar__fill hp-progress-bar__fill--danger"
+                   [style.width.%]="(stats.cancelled / stats.bookings) * 100 || 0"></div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card border-0 rounded-3 h-100 text-white"
-             style="background: linear-gradient(135deg, #f39c12, #e67e22)">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <div class="small opacity-75 mb-1">Total Revenue</div>
-                <div class="fs-2 fw-bold">${{ stats.revenue | number:'1.0-0' }}</div>
-              </div>
-              <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
+          <!-- Quick nav -->
+          <div class="row g-3 mt-3">
+            <div class="col-6">
+              <a routerLink="/admin/rooms" class="hp-quick-nav-card">
+                <i class="bi bi-door-open"></i><span>Manage Rooms</span>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/admin/bookings" class="hp-quick-nav-card">
+                <i class="bi bi-list-check"></i><span>All Bookings</span>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/admin/hotels" class="hp-quick-nav-card">
+                <i class="bi bi-building"></i><span>Hotels</span>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/admin/users" class="hp-quick-nav-card">
+                <i class="bi bi-people"></i><span>Users</span>
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Quick actions -->
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-3 p-4 text-center h-100">
-          <i class="bi bi-building fs-1 text-primary mb-3"></i>
-          <h5 class="fw-bold">Manage Hotels</h5>
-          <p class="text-muted">Add, edit, or remove hotels from the platform</p>
-          <a routerLink="/admin/hotels" class="btn btn-primary-custom mt-auto">Go to Hotels</a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-3 p-4 text-center h-100">
-          <i class="bi bi-list-check fs-1 text-success mb-3"></i>
-          <h5 class="fw-bold">Manage Bookings</h5>
-          <p class="text-muted">View and manage all customer reservations</p>
-          <a routerLink="/admin/bookings" class="btn btn-primary-custom mt-auto">Go to Bookings</a>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-3 p-4 text-center h-100">
-          <i class="bi bi-pie-chart fs-1 text-warning mb-3"></i>
-          <h5 class="fw-bold">Booking Stats</h5>
-          <p class="text-muted">Confirmed: {{ stats.confirmed }} | Cancelled: {{ stats.cancelled }}</p>
-          <div class="progress mt-2" style="height:12px">
-            <div class="progress-bar bg-success" [style.width.%]="(stats.confirmed/stats.bookings)*100 || 0"></div>
-            <div class="progress-bar bg-danger" [style.width.%]="(stats.cancelled/stats.bookings)*100 || 0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </ng-container>
 </div>

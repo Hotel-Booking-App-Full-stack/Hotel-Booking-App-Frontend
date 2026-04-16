@@ -1,69 +1,41 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 
-@Component({
-  selector: 'app-session-timer',
-  templateUrl: './session-timer.component.html'
-})
+@Component({ selector: 'app-session-timer', templateUrl: './session-timer.component.html' })
 export class SessionTimerComponent implements OnInit, OnDestroy {
-  timeLeft = 7 * 60;
-  progressWidth = 100;
-  showWarning = false;
-  isLoggedIn = false;
-  minutes = 7;
-  seconds = 0;
-
-  private interval: any;
+  timeLeft = 7 * 60; progress = 100;
+  showWarning = false; loggedIn = false;
+  min = 7; sec = 0;
+  private iv: any;
 
   constructor(private auth: AuthService) {}
 
   ngOnInit() {
-    this.auth.currentUser$.subscribe(user => {
-      this.isLoggedIn = !!user;
-      if (user) {
-        this.resetTimer();
-      } else {
-        this.clearTimer();
-      }
+    this.auth.currentUser$.subscribe(u => {
+      this.loggedIn = !!u;
+      if (u) this.reset(); else this.clear();
     });
   }
 
-  private resetTimer() {
-    this.clearTimer();
-    this.timeLeft = 7 * 60;
-    this.progressWidth = 100;
-    this.showWarning = false;
-    this.updateDisplay();
-
-    this.interval = setInterval(() => {
+  private reset() {
+    this.clear();
+    this.timeLeft = 7 * 60; this.progress = 100;
+    this.showWarning = false; this.update();
+    this.iv = setInterval(() => {
       this.timeLeft--;
-      this.progressWidth = (this.timeLeft / (7 * 60)) * 100;
-      this.updateDisplay();
+      this.progress = (this.timeLeft / (7 * 60)) * 100;
       this.showWarning = this.timeLeft <= 60;
-
-      if (this.timeLeft <= 0) {
-        this.clearTimer();
-      }
+      this.update();
+      if (this.timeLeft <= 0) this.clear();
     }, 1000);
   }
 
-  private updateDisplay() {
-    this.minutes = Math.floor(this.timeLeft / 60);
-    this.seconds = this.timeLeft % 60;
+  private update() {
+    this.min = Math.floor(this.timeLeft / 60);
+    this.sec = this.timeLeft % 60;
   }
 
-  private clearTimer() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  }
-
-  ngOnDestroy() {
-    this.clearTimer();
-  }
-
-  padZero(n: number): string {
-    return n < 10 ? '0' + n : n.toString();
-  }
+  private clear() { if (this.iv) { clearInterval(this.iv); this.iv = null; } }
+  ngOnDestroy() { this.clear(); }
+  pad(n: number) { return n < 10 ? '0' + n : '' + n; }
 }
